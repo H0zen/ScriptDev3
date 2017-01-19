@@ -43,18 +43,18 @@ enum
     SAY_PHASE_2_TRANS           = -1249002,
     SAY_PHASE_3_TRANS           = -1249003,
     EMOTE_BREATH                = -1249004,
-
-    SPELL_WINGBUFFET            = 18500,
+// First stage
+    SPELL_WINGBUFFET            = 18500, // Wing Buffet
 #if defined (WOTLK) || defined (CATA)
     SPELL_WINGBUFFET_H          = 69293,
 #endif
-    SPELL_FLAMEBREATH           = 18435,
+    SPELL_FLAMEBREATH           = 18435,// Flame Breath
 #if defined (WOTLK) || defined (CATA)
     SPELL_FLAMEBREATH_H         = 68970,
 #endif
 #if defined (CLASSIC) || defined (TBC)
-    SPELL_CLEAVE                = 19983,
-    SPELL_TAILSWEEP             = 15847,
+    SPELL_CLEAVE                = 19983, // Cleave
+    SPELL_TAILSWEEP             = 15847, // Tail Sweep
 #endif
 #if defined (WOTLK) || defined (CATA)
     SPELL_CLEAVE                = 68868,
@@ -63,13 +63,19 @@ enum
 #if defined (WOTLK) || defined (CATA)
     SPELL_TAILSWEEP_H           = 69286,
 #endif
-    SPELL_KNOCK_AWAY            = 19633,
-    SPELL_FIREBALL              = 18392,
+    SPELL_KNOCK_AWAY            = 19633, // Knock Away
 #if defined (WOTLK) || defined (CATA)
     SPELL_FIREBALL_H            = 68926,
 #endif
 
-    // Not much choise about these. We have to make own defintion on the direction/start-end point
+// Second stage
+	SPELL_SUMMONWHELP           = 17646, // summon Onyxian Whelps
+#if defined (WOTLK) || defined (CATA)
+    SPELL_SUMMON_LAIR_GUARD     = 68968,
+#endif
+    MAX_WHELPS_PER_PACK         = 40,
+	SPELL_FIREBALL              = 18392, // Fireball
+	// Deep breathing
     SPELL_BREATH_NORTH_TO_SOUTH = 17086,                    // 20x in "array"
     SPELL_BREATH_SOUTH_TO_NORTH = 18351,                    // 11x in "array"
 
@@ -85,17 +91,10 @@ enum
     SPELL_VISUAL_BREATH_B       = 4919,
 
     SPELL_BREATH_ENTRANCE       = 21131,                    // 8x in "array", different initial cast than the other arrays
-
-    SPELL_BELLOWINGROAR         = 18431,
-    SPELL_HEATED_GROUND         = 22191,                    // Prevent players from hiding in the tunnels when it is time for Onyxia's breath
-
-    SPELL_SUMMONWHELP           = 17646,                    // TODO this spell is only a summon spell, but would need a spell to activate the eggs
-#if defined (WOTLK) || defined (CATA)
-    SPELL_SUMMON_LAIR_GUARD     = 68968,
-#endif
-
-    MAX_WHELPS_PER_PACK         = 40,
-
+// Third stage
+    SPELL_BELLOWINGROAR         = 18431, // Bellowing Roar
+    SPELL_HEATED_GROUND         = 22191, // Heated Ground,prevent players from hiding in the tunnels when it is time for Onyxia's breath
+	
     POINT_ID_NORTH              = 0,
     POINT_ID_SOUTH              = 4,
     NUM_MOVE_POINT              = 8,
@@ -162,17 +161,16 @@ struct boss_onyxia : public CreatureScript
         uint32 m_uiCleaveTimer;
         uint32 m_uiTailSweepTimer;
         uint32 m_uiWingBuffetTimer;
+		uint32 m_uiKnockAwayTimer;		
         uint32 m_uiCheckInLairTimer;
-
         uint32 m_uiMovePoint;
         uint32 m_uiMovementTimer;
-
         uint32 m_uiFireballTimer;
         uint32 m_uiSummonWhelpsTimer;
         uint32 m_uiBellowingRoarTimer;
         uint32 m_uiWhelpTimer;
 #if defined (WOTLK) || defined (CATA)
-    uint32 m_uiSummonGuardTimer;
+		uint32 m_uiSummonGuardTimer;
 #endif
 
         uint8 m_uiSummonCount;
@@ -193,6 +191,7 @@ struct boss_onyxia : public CreatureScript
             m_uiFlameBreathTimer = urand(10000, 20000);
             m_uiTailSweepTimer = urand(15000, 20000);
             m_uiCleaveTimer = urand(2000, 5000);
+			m_uiKnockAwayTimer = urand(10000, 15000);
             m_uiWingBuffetTimer = urand(10000, 20000);
             m_uiCheckInLairTimer = 3000;
 
@@ -200,11 +199,11 @@ struct boss_onyxia : public CreatureScript
             m_uiMovementTimer = 25000;
 
             m_uiFireballTimer = 1000;
-            m_uiSummonWhelpsTimer = 60000;
+            m_uiSummonWhelpsTimer = 30000;
             m_uiBellowingRoarTimer = 30000;
             m_uiWhelpTimer = 1000;
 #if defined (WOTLK) || defined (CATA)
-        m_uiSummonGuardTimer = 15000;
+			m_uiSummonGuardTimer = 15000;
 #endif
 
             m_uiSummonCount = 0;
@@ -286,14 +285,14 @@ struct boss_onyxia : public CreatureScript
 
         void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
         {
-            if (pSpell->Id == SPELL_BREATH_EAST_TO_WEST ||
-                pSpell->Id == SPELL_BREATH_WEST_TO_EAST ||
-                pSpell->Id == SPELL_BREATH_SE_TO_NW ||
-                pSpell->Id == SPELL_BREATH_NW_TO_SE ||
-                pSpell->Id == SPELL_BREATH_SW_TO_NE ||
-                pSpell->Id == SPELL_BREATH_NE_TO_SW ||
-                pSpell->Id == SPELL_BREATH_SOUTH_TO_NORTH ||
-                pSpell->Id == SPELL_BREATH_NORTH_TO_SOUTH)
+			if (pSpell->Id == SPELL_BREATH_EAST_TO_WEST || 
+				pSpell->Id == SPELL_BREATH_WEST_TO_EAST || 
+				pSpell->Id == SPELL_BREATH_SE_TO_NW || 
+				pSpell->Id == SPELL_BREATH_NW_TO_SE || 
+				pSpell->Id == SPELL_BREATH_SW_TO_NE || 
+				pSpell->Id == SPELL_BREATH_NE_TO_SW || 
+				pSpell->Id == SPELL_BREATH_SOUTH_TO_NORTH || 
+				pSpell->Id == SPELL_BREATH_NORTH_TO_SOUTH)			
             {
                 // This was sent with SendMonsterMove - which resulted in better speed than now
                 m_creature->GetMotionMaster()->MovePoint(m_uiMovePoint, aMoveData[m_uiMovePoint].fX, aMoveData[m_uiMovePoint].fY, aMoveData[m_uiMovePoint].fZ);
@@ -384,7 +383,7 @@ struct boss_onyxia : public CreatureScript
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BELLOWINGROAR) == CAST_OK)
                     {
-                        m_uiBellowingRoarTimer = 30000;
+                        m_uiBellowingRoarTimer = urand(15000, 30000);					
                     }
                 }
                 else
@@ -393,7 +392,7 @@ struct boss_onyxia : public CreatureScript
                 }
                 // no break, phase 3 will use same abilities as in 1
             case PHASE_START:
-            {
+            {						
                                 if (m_uiFlameBreathTimer < uiDiff)
                                 {
 #if defined (CLASSIC) || defined (TBC)
@@ -403,7 +402,7 @@ struct boss_onyxia : public CreatureScript
                     if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FLAMEBREATH : SPELL_FLAMEBREATH_H) == CAST_OK)
 #endif
                                     {
-                                        m_uiFlameBreathTimer = urand(10000, 20000);
+                                        m_uiFlameBreathTimer = urand(10000, 20000);										
                                     }
                                 }
                                 else
@@ -427,8 +426,20 @@ struct boss_onyxia : public CreatureScript
                                 {
                                     m_uiTailSweepTimer -= uiDiff;
                                 }
-
-                                if (m_uiCleaveTimer < uiDiff)
+// add Knock Away
+								if (m_uiKnockAwayTimer < uiDiff)
+								{
+									if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+									{ 
+										m_uiKnockAwayTimer = urand(10000, 15000); 
+									}
+								}
+								else
+									{ 
+										m_uiKnockAwayTimer -= uiDiff; 
+									}										
+																															
+					            if (m_uiCleaveTimer < uiDiff)
                                 {
                                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
                                     {
@@ -577,7 +588,7 @@ struct boss_onyxia : public CreatureScript
                                  {
                                      if (m_uiSummonWhelpsTimer < uiDiff)
                                      {
-                                         m_bIsSummoningWhelps = true;
+                                         m_bIsSummoningWhelps = true;										 
                                      }
                                      else
                                      {
